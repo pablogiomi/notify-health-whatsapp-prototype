@@ -32,8 +32,8 @@ This README will be updated as the project progresses. At any point it reflects 
 
 | Area | Status |
 |---|---|
-| Development environment | ⏳ In setup |
-| Meta Cloud API sandbox | ⏳ Pending |
+| Development environment | ✅ Ready |
+| Meta Cloud API sandbox | ✅ Verified (test message sent end-to-end) |
 | Send endpoint | ⏸ Not started |
 | Webhook receiver | ⏸ Not started |
 | Database & schema | ⏸ Not started |
