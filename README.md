@@ -34,6 +34,7 @@ This README will be updated as the project progresses. At any point it reflects 
 |---|---|
 | Development environment | ✅ Ready |
 | Meta Cloud API sandbox | ✅ Verified (test message sent end-to-end) |
+| FastAPI skeleton  | ✅ Running (health endpoint verified) |
 | Send endpoint | ⏸ Not started |
 | Webhook receiver | ⏸ Not started |
 | Database & schema | ⏸ Not started |
