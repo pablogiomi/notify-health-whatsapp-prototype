@@ -4,7 +4,9 @@ import logging
 
 from fastapi import FastAPI
 
+import app.models  # noqa: F401 — registers ORM models with Base before create_all
 from app.config import settings
+from app.db import Base, engine
 
 
 logging.basicConfig(level=settings.log_level.upper())
@@ -15,7 +17,8 @@ app = FastAPI(title="Notify Health WhatsApp Prototype", version="0.1.0")
 
 @app.on_event("startup")
 async def on_startup() -> None:
-    """Log the active environment on startup."""
+    """Create database tables and log the active environment."""
+    Base.metadata.create_all(bind=engine)
     logger.info("Starting up — log_level=%s database=%s", settings.log_level, settings.database_url)
 
 
