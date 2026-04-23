@@ -7,12 +7,14 @@ from fastapi import FastAPI
 import app.models  # noqa: F401 — registers ORM models with Base before create_all
 from app.config import settings
 from app.db import Base, engine
+from app.routers.send import router as send_router
 
 
 logging.basicConfig(level=settings.log_level.upper())
 logger = logging.getLogger(__name__)
 
 app = FastAPI(title="Notify Health WhatsApp Prototype", version="0.1.0")
+app.include_router(send_router)
 
 
 @app.on_event("startup")
