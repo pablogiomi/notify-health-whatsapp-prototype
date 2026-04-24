@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Notify Health — WhatsApp Monitor</title>
+  <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+  <style>
+    body { font-family: sans-serif; max-width: 900px; margin: 0 auto; padding: 1rem 2rem; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid #ccc; padding: 0.5rem 0.75rem; text-align: left; }
+    th { background: #f4f4f4; }
+    .reach-yes     { color: green; }
+    .reach-no      { color: red; }
+    .reach-unknown { color: grey; }
+    .status-read      { color: #006400; }
+    .status-delivered { color: green; }
+    .status-sent      { color: blue; }
+    .status-failed    { color: red; }
+    .status-none      { color: grey; }
+    button { padding: 0.5rem 1.25rem; cursor: pointer; }
+    .footer { margin-top: 1rem; font-size: 0.85rem; color: #888; }
+  </style>
+</head>
+<body>
+  <h1>Notify Health — WhatsApp Monitor</h1>
+
+  <button
+    hx-post="/send"
+    hx-swap="none"
+    hx-on::after-request="alert(event.detail.xhr.responseText)"
+  >Run Campaign</button>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Phone</th>
+        <th>Reachable</th>
+        <th>Last Status</th>
+        <th>Last Updated</th>
+      </tr>
+    </thead>
+    <tbody
+      hx-get="/dashboard/table"
+      hx-trigger="every 5s"
+      hx-swap="outerHTML"
+    >
+      {% for r in recipients %}
+      <tr>
+        <td>{{ r.name if r.name else "—" }}</td>
+        <td>{{ r.phone_number }}</td>
+        <td class="reach-{{ r.whatsapp_reachable }}">{{ r.whatsapp_reachable }}</td>
+        <td class="status-{{ r.last_status if r.last_status else 'none' }}">
+          {{ r.last_status if r.last_status else "—" }}
+        </td>
+        <td>
+          {% if r.last_updated %}{{ r.last_updated.strftime("%Y-%m-%d %H:%M") }}{% else %}—{% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <p class="footer">Page loaded at {{ generated_at }}</p>
+</body>
+</html>
