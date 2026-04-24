@@ -15,6 +15,7 @@ async def send_template_message(
     Returns the parsed JSON response on HTTP 200.
     Raises httpx.HTTPStatusError on any non-2xx response.
     """
+    to = phone_number.lstrip("+")
     url = (
         f"https://graph.facebook.com"
         f"/{settings.whatsapp_graph_api_version}"
@@ -27,7 +28,7 @@ async def send_template_message(
     payload = {
         "messaging_product": "whatsapp",
         "recipient_type": "individual",
-        "to": phone_number,
+        "to": to,
         "type": "template",
         "template": {
             "name": template_name,
