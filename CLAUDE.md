@@ -26,6 +26,20 @@ pytest tests/test_webhooks.py::test_signature_verification
 
 Dependencies are in `requirements.txt` (loosely pinned with `~=`). Install with `pip install -r requirements.txt`.
 
+## One-off commands
+
+These are run manually when needed, not on every startup.
+
+```bash
+# Seed recipients from CSV (run once after first deploy,
+# or after wiping the database for a demo reset)
+python scripts/seed_recipients.py
+
+# Seed on Railway — Railway uses /opt/venv/bin/python, not system python
+railway ssh
+/opt/venv/bin/python scripts/seed_recipients.py
+```
+
 ## Architecture
 
 A FastAPI application that sends WhatsApp reminder messages via the Meta Cloud API and tracks delivery through webhooks.
@@ -34,7 +48,7 @@ A FastAPI application that sends WhatsApp reminder messages via the Meta Cloud A
 
 **Async message lifecycle:** The app sends a template to Meta and receives only a receipt (`wamid`). Actual delivery happens asynchronously — Meta calls back via webhooks. The `wamid` is the join key between outbound sends and inbound webhook events.
 
-**Planned endpoints** (only `/health` exists today):
+**Endpoints:**
 
 | Endpoint | Role |
 |---|---|
@@ -54,17 +68,18 @@ A FastAPI application that sends WhatsApp reminder messages via the Meta Cloud A
 
 ```
 app/
-├── main.py          # FastAPI app + startup hook
+├── main.py          # FastAPI app, startup hook, router registration
 ├── config.py        # pydantic-settings; fails fast if env vars missing
-├── db.py            # SQLAlchemy engine, SessionLocal, Base
+├── db.py            # SQLAlchemy engine, SessionLocal, Base, get_db
 ├── models.py        # ORM models: Recipient, Message, MessageEvent
 ├── whatsapp.py      # Async httpx client wrapping Meta's Graph API
-├── webhooks.py      # Signature verification + event handler dispatch
-├── campaigns.py     # Campaign run logic (iterate recipients → send)
 └── routers/
-    ├── send.py
-    ├── webhook.py
-    └── dashboard.py
+    ├── send.py      # POST /send — campaign runner
+    ├── webhook.py   # GET + POST /webhook — verification + event handler
+    └── dashboard.py # GET /dashboard + GET /dashboard/table
+templates/
+    ├── dashboard.html        # Full page
+    └── dashboard_table.html  # HTMX fragment (tbody only)
 ```
 
 ## Configuration
