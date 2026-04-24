@@ -35,12 +35,12 @@ This README will be updated as the project progresses. At any point it reflects 
 | Development environment | ✅ Ready |
 | Meta Cloud API sandbox | ✅ Verified (test message sent end-to-end) |
 | FastAPI skeleton  | ✅ Running (health endpoint verified) |
-| Send endpoint           | ✅ Working                                    |
-| Webhook receiver        | ✅ Working (signature verified, events logged)|
-| Database & schema       | ✅ Working                                    |
-| Campaign runner | ⏸ Not started |
-| Dashboard | ⏸ Not started |
-| Deployment | ⏸ Not started |
+| Send endpoint           | ✅ Working                                     |
+| Webhook receiver        | ✅ Working (signature verified, events logged) |
+| Database & schema       | ✅ Working                                     |
+| Campaign runner         | ✅ Working                                     |
+| Dashboard               | ✅ Working (HTMX auto-refresh)                 |
+| Deployment              | ✅ Live on Railway                             |
 
 ---
 
@@ -72,7 +72,7 @@ A separate `docs/setup.md` will walk through obtaining Meta Cloud API credential
 
 If you are from Notify Health reviewing this:
 
-- The live instance is at: *to be deployed — link coming at submission.*
+- The live instance is at: (https://web-production-25be6.up.railway.app/dashboard)
 - [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) explains every component and why it was chosen.
 - [`docs/DECISIONS.md`](docs/DECISIONS.md) is a running log of architectural decisions — every tradeoff is documented, not hidden.
 - [`docs/whatsapp-api-primer.md`](docs/whatsapp-api-primer.md) is a plain-language explanation of how the WhatsApp Cloud API actually works, useful for anyone on your team evaluating WhatsApp as a channel.
