@@ -211,4 +211,45 @@ The cost — a learning curve for an ORM-new developer — is real but worth pay
 
 ---
 
+## DR-014 — Test-mode failure codes differ from production
+
+**Date:** 2026-04-24
+**Status:** Observed during development
+
+**Context.** In Meta's test tier, sending to an unverified recipient number returns a send-level failure (HTTP 4xx, no wamid assigned) rather than a webhook-level failure (wamid assigned, later failed webhook with error code 131026).
+
+**Consequence.** The reachability classifier (DR-002) only triggers on webhook-level failures carrying error codes 131026 or 131051. Send-level failures leave whatsapp_reachable = "unknown" because we cannot distinguish "number not on WhatsApp" from "number not verified in test mode."
+
+**In production.** All numbers are reachable for send attempts. A number that isn't on WhatsApp will receive a wamid, then fail with error code 131026 in a webhook callback, correctly triggering the classifier.
+
+**Implication for Notify Health.** The reachability classification feature works correctly in production. Test-mode results for unverified numbers should not be interpreted as reachability data.
+
+---
+
+## DR-015 — Graph API version: pinned to v25.0
+
+**Date:** 2026-04-22
+**Status:** Accepted
+
+**Context.** Meta's Graph API releases new versions regularly and eventually deprecates old ones. The default version in Meta's own code snippets was v23.0 at project start; the live API was already running v25.0 as observed in response headers during Day 1 testing.
+
+**Decision.** Pin explicitly to v25.0 in config.py default and CLAUDE.md. Bump intentionally when Meta announces deprecations.
+
+**Reasoning.** Unpinned version references mean Meta upgrades can silently change behaviour. A pinned version makes upgrades a deliberate decision with a visible diff. Observed during Day 1 when the curl smoke test response headers showed facebook-api-version: v25.0 while our config said v23.0.
+
+---
+
+## DR-016 — Template language: en_US for prototype only
+
+**Date:** 2026-04-22
+**Status:** Accepted
+
+**Context.** The hello_world test template ships with Meta test accounts in en_US only. Notify Health's production use case involves multiple languages (English, Swahili, French, and others depending on country of deployment).
+
+**Decision.** Hard-code en_US as the default in config for the prototype. Treat multi-language support as a production concern.
+
+**Reasoning.** Template localisation requires separate Meta approval per language per template — a process that cannot be completed within the prototype timeline. The architecture supports multiple languages (template_language is a config value, not hardcoded in logic), so adding languages later is an operational process, not a code change. Flagged in production-migration.md.
+
+---
+
 *New decisions will be added below as they occur.*
