@@ -6,7 +6,7 @@
   {% for r in recipients %}
   <tr>
     <td>{{ r.name if r.name else "—" }}</td>
-    <td>{{ r.phone_number }}</td>
+    <td>···{{ r.phone_number[-4:] }}</td>
     <td class="reach-{{ r.whatsapp_reachable }}">{{ r.whatsapp_reachable }}</td>
     <td class="status-{{ r.last_status if r.last_status else 'none' }}">
       {{ r.last_status if r.last_status else "—" }}
