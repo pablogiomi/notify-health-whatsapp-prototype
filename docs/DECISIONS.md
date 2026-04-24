@@ -252,4 +252,50 @@ The cost — a learning curve for an ORM-new developer — is real but worth pay
 
 ---
 
+## DR-017 — Railway persistent volume mount path
+
+**Date:** 2026-04-24
+**Status:** Accepted
+
+**Context.** Railway's ephemeral filesystem resets on every deploy.
+SQLite requires a persistent volume to survive redeployments.
+
+**Decision.** Mount volume at /app/data, set
+DATABASE_URL=sqlite:////app/data/app.db (absolute path,
+four slashes).
+
+**Reasoning.** Mounting at /app would conflict with application
+files. /app/data is a clean subdirectory. Four slashes in the
+SQLAlchemy URL denotes an absolute path from filesystem root —
+three slashes would be relative to the working directory and
+would write to the ephemeral filesystem instead.
+
+**Observed failure mode.** Environment variables were wiped after
+a force-push history rewrite (git filter-repo). Railway treated
+the rewritten history as a new deployment context. Recovery:
+re-enter all variables from local .env file.
+
+---
+
+## DR-018 — Dashboard PII protection: masked phone numbers
+
+**Date:** 2026-04-24
+**Status:** Accepted
+
+**Context.** The dashboard is publicly accessible (no auth) and
+displays recipient phone numbers. Anyone with the Railway URL
+can see them.
+
+**Decision.** Mask phone numbers on the dashboard, showing only
+the last 4 digits (e.g. "···8089").
+
+**Reasoning.** Full phone numbers are PII. The dashboard is
+a demo tool, not a data management interface — last 4 digits
+are sufficient to identify a recipient during a demo. Full
+authentication on the dashboard is the correct production
+solution (documented in production-migration.md) but out of
+scope for the prototype.
+
+---
+
 *New decisions will be added below as they occur.*

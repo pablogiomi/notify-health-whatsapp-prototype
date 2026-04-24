@@ -1,19 +1,127 @@
 # Production migration guide
 
-> **Status:** Placeholder. To be written on Day 6, once the prototype is deployed and we have concrete observations about what changes between sandbox and production.
+This document describes what changes between this prototype
+and a production deployment. Every item is a configuration
+change, credential swap, or operational process — no code
+rewrites are required.
 
-This document will walk through, step by step, what Notify Health (or any successor team) needs to change to move this prototype to a real production environment sending reminders to thousands of recipients.
+## 1. Sender phone number
 
-Expected sections:
+**Prototype:** Meta-provided test number shared across all
+developer accounts.
+**Production:** A real phone number owned by Notify Health,
+registered on a verified WhatsApp Business Account.
+Registration requires Meta business verification (~1-5 days).
 
-1. Replacing the test sender phone number with a real WhatsApp Business Account number
-2. Moving from a 24-hour temporary token to a long-lived System User token, with rotation procedure
-3. Submitting and managing production message templates (Utility category), including localisation for recipient languages
-4. Migrating from SQLite to managed Postgres
-5. Applying rate limiting aligned with Meta's messaging tier
-6. Opt-in management and STOP-keyword handling
-7. Monitoring, alerting, and log aggregation
-8. Cost estimation at expected production volumes
-9. Failure playbook (webhook outages, token expiry, template rejections)
+## 2. Access token
 
-The goal of this document is that a developer unfamiliar with the project could take the prototype from sandbox to production in a single week by following it.
+**Prototype:** Temporary 24-hour token generated from the
+Meta developer dashboard.
+**Production:** A long-lived System User token that does not
+expire. Created via Meta Business Manager → System Users →
+Generate Token. Rotate on a schedule (every 6-12 months)
+and store in a secrets manager rather than plain environment
+variables.
+
+## 3. Recipients
+
+**Prototype:** Up to 5 manually verified numbers in test mode.
+**Production:** Unlimited. Recipients do not need to opt in
+via any Meta process — they receive messages as long as a
+valid template is used. Notify Health's existing consent
+process (used for SMS) applies.
+
+## 4. Message template
+
+**Prototype:** hello_world (pre-approved, ships with all
+test accounts, English only).
+**Production:** Custom Utility-category template submitted
+to Meta for approval. Approval takes 24-72 hours and may
+require wording changes. One submission per language —
+submit all required languages before launch.
+
+Suggested template for Notify Health:
+
+    Category: Utility
+    Name: immunisation_reminder
+    Body: "Hi {{1}}, this is a reminder that {{2}} is due for
+    their {{3}} vaccination on {{4}}. Reply STOP to opt out."
+
+## 5. Database
+
+**Prototype:** SQLite file on Railway's persistent volume.
+**Production:** Managed Postgres (Railway, Supabase, or AWS
+RDS). Migration is a one-line change to DATABASE_URL —
+SQLAlchemy abstracts the dialect. Run Alembic migrations
+instead of create_all at startup.
+
+## 6. Dashboard authentication
+
+**Prototype:** No authentication — dashboard is publicly
+accessible.
+**Production:** Add HTTP Basic Auth or OAuth2 via FastAPI's
+security utilities. Required before any real recipient data
+is loaded. Estimated effort: 2-4 hours.
+
+## 7. Hosting
+
+**Prototype:** Railway free tier — may sleep, limited
+resources, no SLA.
+**Production:** Railway Hobby/Pro tier, or Notify Health's
+preferred cloud provider. Enable autoscaling if campaign
+volumes exceed 1,000 messages/day.
+
+## 8. Secrets management
+
+**Prototype:** Railway environment variables (encrypted at
+rest, sufficient for a prototype).
+**Production:** Dedicated secrets manager — AWS Secrets
+Manager, HashiCorp Vault, or Railway's secret references.
+Enables rotation, auditing, and fine-grained access control.
+
+## 9. Observability
+
+**Prototype:** Logs visible in Railway dashboard.
+**Production:** Structured logs forwarded to a centralised
+aggregator (Datadog, Papertrail, or similar). Alerts on:
+- Webhook failure rate > 5%
+- Campaign send failure rate > 10%
+- Access token expiry (proactive alert 48h before expiry)
+- Database disk usage > 80%
+
+## 10. Rate limiting
+
+**Prototype:** Well under Meta's messaging tier limits.
+**Production:** Respect Meta's tiered limits (1,000 →
+10,000 → 100,000 messages/day based on account quality
+score). Apply internal throttling in campaigns.py to
+stay within limits during large campaigns.
+
+## 11. Recipient opt-out handling
+
+**Prototype:** Not implemented.
+**Production:** When a recipient replies STOP, an inbound
+message webhook fires. Add a handler in webhook.py that
+sets whatsapp_reachable = "no" and logs the opt-out.
+Critical for legal compliance and Meta's spam policies.
+
+## 12. Retry logic
+
+**Prototype:** Failed sends are logged and skipped.
+**Production:** Implement exponential backoff retry for
+transient failures (network errors, 429 rate limits).
+Do not retry permanent failures (131026, 131051).
+
+## Migration checklist
+
+- [ ] Meta business verification complete
+- [ ] Real sender number registered and approved
+- [ ] System User token generated and stored
+- [ ] Custom template submitted and approved (all languages)
+- [ ] Postgres database provisioned and DATABASE_URL updated
+- [ ] Dashboard authentication added
+- [ ] All environment variables migrated to secrets manager
+- [ ] Observability pipeline configured
+- [ ] Rate limiting tested at expected campaign volume
+- [ ] Opt-out handler implemented and tested
+- [ ] Load test at 10% of expected peak volume
