@@ -91,6 +91,53 @@ For local webhook testing, Meta needs a public URL — use ngrok to tunnel to `l
 
 **Never read or write the .env file.** Credentials are the user's responsibility.
 
+## Test protocol
+
+Run this protocol when Pablo says "test me", "knowledge check", or "run the test protocol". Also offer it at the end of any session where significant new concepts were covered.
+
+### Structure
+
+1. Generate 8–10 questions covering concepts from the current or most recent working session. Weight questions toward:
+   - Concepts Pablo got wrong or flagged as unclear
+   - The "why" behind decisions, not just the "what"
+   - Edge cases and failure modes (these reveal real understanding)
+   - At least one question requiring Pablo to write or describe actual code or a command
+
+2. Present all questions at once. Wait for all answers before giving feedback.
+
+3. Score each answer:
+   - Full credit: correct reasoning, not just correct answer
+   - Partial credit: right outcome, wrong or incomplete reasoning
+   - Zero: incorrect, or "I don't know" (honest zero beats a guess)
+
+4. Feedback format:
+   - What was right and why
+   - What was wrong and the correct explanation
+   - One-line "remember this" summary for any score below 6/10
+
+5. End with:
+   - A score summary table
+   - The two or three weakest areas to reinforce
+   - Whether to run a follow-up test at the start of next session (recommend yes if average score below 7/10)
+
+### Timing
+
+- End of session: when significant new code or concepts were built
+- Start of session: only if previous session ended with average below 7/10, or if more than 2 days have passed since last session
+- Never run mid-session — it breaks coding flow
+
+### Question bank guidance
+
+Draw from these topic areas as relevant:
+- Git operations and what they actually do internally
+- Database concepts (sessions, transactions, flush vs commit, foreign keys, relationships, Base)
+- HTTP and API concepts (status codes, headers, REST, async)
+- WhatsApp API specifics (wamid, templates, webhooks, error codes)
+- FastAPI patterns (dependencies, routers, request lifecycle)
+- Python concepts introduced during coding (SecretStr, async/await, generators, type hints)
+- Security concepts (HMAC, signature verification, SecretStr, environment variables)
+- Architecture decisions — the "why" behind DR-001 through DR-016
+
 ## Key design decisions
 
 - **Reachability is observed, not pre-checked** — Meta deprecated the `contacts` endpoint. Start everyone at `unknown`; first campaign transitions to `yes`/`no` based on webhook error codes (`131026`, `131051` = unreachable).
