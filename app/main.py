@@ -3,6 +3,7 @@
 import logging
 
 from fastapi import FastAPI
+from starlette.responses import FileResponse
 
 import app.models  # noqa: F401 — registers ORM models with Base before create_all
 from app.config import settings
@@ -32,3 +33,9 @@ async def on_startup() -> None:
 async def health() -> dict[str, str]:
     """Liveness check used by Railway and manual curl tests."""
     return {"status": "ok", "version": "0.1.0"}
+
+
+@app.get("/architecture")
+async def architecture() -> FileResponse:
+    """Serve the system architecture diagram as a static HTML page."""
+    return FileResponse("app/templates/architecture.html")
