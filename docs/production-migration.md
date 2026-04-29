@@ -97,22 +97,12 @@ aggregator (Datadog, Papertrail, or similar). Alerts on:
 score). Apply internal throttling in campaigns.py to
 stay within limits during large campaigns.
 
-## 11. Recipient opt-out handling
-
-**Prototype:** Not implemented.
-**Production:** When a recipient replies STOP, an inbound
-message webhook fires. Add a handler in webhook.py that
-sets whatsapp_reachable = "no" and logs the opt-out.
-Critical for legal compliance and Meta's spam policies.
-
-## 12. Retry logic
-
-**Prototype:** Failed sends are logged and skipped.
-**Production:** Implement exponential backoff retry for
-transient failures (network errors, 429 rate limits).
-Do not retry permanent failures (131026, 131051).
-
 ## Migration checklist
+
+Steps 1–3 are hard prerequisites — Meta business verification
+must complete before the sender number can be registered, and
+the sender number must exist before the template can be
+submitted or the System User token scoped correctly.
 
 - [ ] Meta business verification complete
 - [ ] Real sender number registered and approved
@@ -123,5 +113,5 @@ Do not retry permanent failures (131026, 131051).
 - [ ] All environment variables migrated to secrets manager
 - [ ] Observability pipeline configured
 - [ ] Rate limiting tested at expected campaign volume
-- [ ] Opt-out handler implemented and tested
 - [ ] Load test at 10% of expected peak volume
+- [ ] Feature backlog items resolved — see docs/backlog.md

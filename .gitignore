@@ -31,6 +31,8 @@ pip-delete-this-directory.txt
 *.sqlite3
 app.db
 app.db-journal
+data/*.db
+!data/.gitkeep
 
 # ===== IDE & editor =====
 .vscode/
