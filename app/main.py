@@ -39,3 +39,9 @@ async def health() -> dict[str, str]:
 async def architecture() -> FileResponse:
     """Serve the system architecture diagram as a static HTML page."""
     return FileResponse("app/templates/architecture.html")
+
+
+@app.get("/cea")
+async def cea() -> FileResponse:
+    """Serve the cost-effectiveness analysis page as a static HTML page."""
+    return FileResponse("app/templates/cea.html")

@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cost-Effectiveness Analysis — Notify Health</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:    #0d1117;
+      --card:  #161b22;
+      --bord:  #30363d;
+      --bord-dim: #21262d;
+      --green: #3fb950;
+      --blue:  #79c0ff;
+      --org:   #f0883e;
+      --pur:   #d2a8ff;
+      --muted: #8b949e;
+      --text:  #c9d1d9;
+      --red:   #ff7b72;
+      --head:  #f0f6fc;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'IBM Plex Mono', 'Fira Mono', 'Courier New', monospace;
+      font-size: 13px;
+      line-height: 1.6;
+      padding: 20px 16px 48px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    /* ── Header ── */
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 24px;
+      gap: 16px;
+    }
+    .page-header h1 {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--head);
+      letter-spacing: -0.5px;
+      margin: 4px 0;
+    }
+    .tagline {
+      font-size: 10px;
+      color: var(--green);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .subtitle {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+    .nav-buttons {
+      display: flex;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+    .nav-btn {
+      display: inline-block;
+      background: rgba(63, 185, 80, 0.094);
+      border: 1px solid rgba(63, 185, 80, 0.333);
+      color: var(--green);
+      border-radius: 6px;
+      padding: 8px 14px;
+      font-size: 11px;
+      font-family: inherit;
+      text-decoration: none;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+    }
+    .nav-btn:hover { background: rgba(63, 185, 80, 0.15); }
+
+    /* ── Cards ── */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--bord);
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+    .card h2 {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--head);
+      letter-spacing: 0.3px;
+      margin-bottom: 4px;
+    }
+    .card-note {
+      font-size: 10px;
+      color: var(--muted);
+      margin-bottom: 14px;
+    }
+
+    /* ── Tables ── */
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th {
+      background: var(--bord-dim);
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      padding: 7px 10px;
+      text-align: left;
+      border-bottom: 1px solid var(--bord);
+    }
+    td {
+      padding: 7px 10px;
+      border-bottom: 1px solid var(--bord-dim);
+      font-size: 12px;
+      color: var(--text);
+    }
+    tr:last-child td { border-bottom: none; }
+    td.num { text-align: right; font-variant-numeric: tabular-nums; }
+    td.hi  { color: var(--green); font-weight: 700; }
+    td.med { color: var(--org); }
+    td.lo  { color: var(--red); }
+
+    /* ── Section divider ── */
+    .section-label {
+      font-size: 9px;
+      color: var(--muted);
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      border-top: 1px solid var(--bord-dim);
+      padding-top: 10px;
+      margin-top: 16px;
+      margin-bottom: 6px;
+    }
+
+    /* ── A/B Arms ── */
+    .arms {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 12px;
+    }
+    @media (max-width: 600px) { .arms { grid-template-columns: 1fr; } }
+    .arm {
+      background: var(--bg);
+      border: 1px solid var(--bord);
+      border-radius: 6px;
+      padding: 12px;
+    }
+    .arm-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .arm-a .arm-label { color: var(--blue); }
+    .arm-b .arm-label { color: var(--pur); }
+    .arm-c .arm-label { color: var(--org); }
+    .arm-title { font-size: 12px; color: var(--head); margin-bottom: 6px; font-weight: 600; }
+    .arm-detail { font-size: 10px; color: var(--muted); line-height: 1.7; }
+    .arm-cost {
+      margin-top: 8px;
+      font-size: 10px;
+      color: var(--green);
+      background: rgba(63,185,80,0.08);
+      border: 1px solid rgba(63,185,80,0.2);
+      border-radius: 4px;
+      padding: 4px 8px;
+      display: inline-block;
+    }
+
+    /* ── Sliders ── */
+    .sliders { display: flex; flex-direction: column; gap: 18px; margin-top: 14px; }
+    .slider-row { display: flex; flex-direction: column; gap: 5px; }
+    .slider-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+    }
+    .slider-label { font-size: 11px; color: var(--muted); }
+    .slider-value { font-size: 13px; font-weight: 700; color: var(--head); font-variant-numeric: tabular-nums; }
+    input[type=range] {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 4px;
+      border-radius: 2px;
+      background: var(--bord);
+      outline: none;
+      cursor: pointer;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      background: var(--green);
+      cursor: pointer;
+    }
+    input[type=range]::-moz-range-thumb {
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      background: var(--green);
+      cursor: pointer;
+      border: none;
+    }
+
+    /* ── Result cards ── */
+    .results {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-top: 20px;
+    }
+    @media (max-width: 640px) { .results { grid-template-columns: repeat(2, 1fr); } }
+    .result-card {
+      background: var(--bg);
+      border: 1px solid var(--bord);
+      border-radius: 6px;
+      padding: 14px 12px;
+    }
+    .result-card-label { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+    .result-card-value { font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; }
+    .result-card-sub   { font-size: 9px; color: var(--muted); margin-top: 3px; }
+    #card-daly-value.below-bar { color: var(--green); }
+    #card-daly-value.near-bar  { color: var(--org); }
+    #card-daly-value.above-bar { color: var(--red); }
+    #bar-badge {
+      margin-top: 8px;
+      font-size: 9px;
+      padding: 3px 8px;
+      border-radius: 4px;
+      display: inline-block;
+      font-weight: 700;
+    }
+    #bar-badge.below-bar { color: var(--green); background: rgba(63,185,80,0.12); border: 1px solid rgba(63,185,80,0.3); }
+    #bar-badge.near-bar  { color: var(--org);   background: rgba(240,136,62,0.12); border: 1px solid rgba(240,136,62,0.3); }
+    #bar-badge.above-bar { color: var(--red);   background: rgba(255,123,114,0.12); border: 1px solid rgba(255,123,114,0.3); }
+
+    /* ── Sensitivity table ── */
+    #sensitivity-table td.cell-green { color: var(--green); font-weight: 700; }
+    #sensitivity-table td.cell-org   { color: var(--org); }
+    #sensitivity-table td.cell-red   { color: var(--red); }
+    #sensitivity-table th.col-head   { color: var(--blue); }
+    #sensitivity-table td.row-head   { color: var(--muted); font-size: 10px; }
+
+    /* ── Legend ── */
+    .legend { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 10px; }
+    .legend-item { display: flex; align-items: center; gap: 6px; font-size: 10px; color: var(--muted); }
+    .legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+    /* ── Footer ── */
+    .page-footer { margin-top: 24px; font-size: 9px; color: var(--bord); text-align: right; }
+  </style>
+</head>
+<body>
+
+  <!-- ── Header ── -->
+  <div class="page-header">
+    <div>
+      <div class="tagline">● notify-health-whatsapp-prototype</div>
+      <h1>Cost-Effectiveness Analysis</h1>
+      <p class="subtitle">Nigeria EPI · WhatsApp reminders · $/DALY model · April 2026</p>
+    </div>
+    <div class="nav-buttons">
+      <a href="/dashboard" class="nav-btn">← Dashboard</a>
+      <a href="/architecture" class="nav-btn">Architecture</a>
+    </div>
+  </div>
+
+  <!-- ── 1. Media type pricing ── -->
+  <div class="card">
+    <h2>Media Type Pricing</h2>
+    <p class="card-note">Meta Cloud API — Nigeria — Utility category — April 2026 — direct API, no BSP markup</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Media type</th>
+          <th>Cost / message</th>
+          <th>Approx. data usage</th>
+          <th>Template complexity</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Text</td>
+          <td class="num hi">$0.014</td>
+          <td>&lt; 2 KB</td>
+          <td>Simple copy — fastest approval</td>
+        </tr>
+        <tr>
+          <td>Audio</td>
+          <td class="num hi">$0.014</td>
+          <td>50–200 KB</td>
+          <td>Requires audio file upload to Meta</td>
+        </tr>
+        <tr>
+          <td>Image</td>
+          <td class="num hi">$0.014</td>
+          <td>50–150 KB</td>
+          <td>Requires image URL or uploaded handle</td>
+        </tr>
+        <tr>
+          <td>Video</td>
+          <td class="num hi">$0.014</td>
+          <td>1–10 MB</td>
+          <td>Large download — not recommended for low-bandwidth</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="section-label">Channel cost comparison</div>
+    <table>
+      <thead>
+        <tr>
+          <th>Channel</th>
+          <th>Cost / message</th>
+          <th>Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>SMS — Africa's Talking</td>
+          <td class="num">~$0.0015</td>
+          <td>₦2.50 / message</td>
+        </tr>
+        <tr>
+          <td>SMS — Telerivet platform fee</td>
+          <td class="num">~$0.0070</td>
+          <td>Per-message fee</td>
+        </tr>
+        <tr>
+          <td><strong>SMS total (AT + Telerivet)</strong></td>
+          <td class="num"><strong>~$0.0085</strong></td>
+          <td>Current baseline</td>
+        </tr>
+        <tr>
+          <td>Voice — Africa's Talking</td>
+          <td class="num">~$0.0090</td>
+          <td>₦15 / min; ~1 min avg reminder</td>
+        </tr>
+        <tr>
+          <td>Voice — Telerivet platform fee</td>
+          <td class="num">~$0.0070</td>
+          <td>Per-call fee</td>
+        </tr>
+        <tr>
+          <td><strong>Voice total (AT + Telerivet)</strong></td>
+          <td class="num"><strong>~$0.016</strong></td>
+          <td>Current voice baseline</td>
+        </tr>
+        <tr>
+          <td><strong>WhatsApp — Meta Cloud API direct</strong></td>
+          <td class="num hi"><strong>$0.014</strong></td>
+          <td>No BSP markup; all media types same price</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ── 2. A/B test design ── -->
+  <div class="card">
+    <h2>A/B Test Design</h2>
+    <p class="card-note">All three arms have identical Meta cost per delivery attempt — the experiment adds zero incremental budget</p>
+
+    <div class="arms">
+      <div class="arm arm-a">
+        <div class="arm-label">Arm A</div>
+        <div class="arm-title">Text reminder</div>
+        <div class="arm-detail">
+          Written message with child name, vaccine name, and appointment date.<br><br>
+          Metrics: delivery rate · appointment attendance · opt-out rate
+        </div>
+        <span class="arm-cost">$0.014 / msg</span>
+      </div>
+      <div class="arm arm-b">
+        <div class="arm-label">Arm B</div>
+        <div class="arm-title">Audio reminder</div>
+        <div class="arm-detail">
+          30-second voice recording. Meta reports "read" when the file is played — direct engagement proxy.<br><br>
+          Metrics: play rate · recall · attendance · opt-out rate
+        </div>
+        <span class="arm-cost">$0.014 / msg</span>
+      </div>
+      <div class="arm arm-c">
+        <div class="arm-label">Arm C</div>
+        <div class="arm-title">Image reminder</div>
+        <div class="arm-detail">
+          Vaccination schedule card with appointment circled. High visual salience.<br><br>
+          Metrics: image view rate · attendance · opt-out rate
+        </div>
+        <span class="arm-cost">$0.014 / msg</span>
+      </div>
+    </div>
+
+    <div class="section-label">Randomisation and power</div>
+    <table>
+      <thead>
+        <tr><th>Design choice</th><th>Decision</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Randomisation unit</td><td>Caregiver (not message — prevents within-caregiver confounding)</td></tr>
+        <tr><td>Min detectable effect at 5k / arm</td><td>~5pp at 80% power, alpha 0.05, baseline 60%</td></tr>
+        <tr><td>Min detectable effect at 3k / arm</td><td>~7pp</td></tr>
+        <tr><td>Primary outcome</td><td>Vaccination appointment attendance (requires outcome data linkage)</td></tr>
+        <tr><td>Secondary outcomes</td><td>WhatsApp delivery rate, read/play rate, opt-out rate</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ── 3. Interactive $/DALY model ── -->
+  <div class="card">
+    <h2>$/DALY Cost-Effectiveness Model</h2>
+    <p class="card-note">
+      Formula: cost = caregivers × 7 reminders × $0.014 × overhead multiplier &nbsp;|&nbsp;
+      DALYs = caregivers × uplift × 0.027 × 38
+    </p>
+
+    <div class="sliders">
+      <div class="slider-row">
+        <div class="slider-header">
+          <span class="slider-label">Caregivers reached</span>
+          <span class="slider-value" id="val-caregivers">15,000</span>
+        </div>
+        <input type="range" id="sl-caregivers" min="1000" max="100000" step="1000" value="15000"
+               oninput="update()">
+      </div>
+      <div class="slider-row">
+        <div class="slider-header">
+          <span class="slider-label">Vaccination uplift (percentage points)</span>
+          <span class="slider-value" id="val-uplift">18 pp</span>
+        </div>
+        <input type="range" id="sl-uplift" min="5" max="30" step="1" value="18"
+               oninput="update()">
+      </div>
+      <div class="slider-row">
+        <div class="slider-header">
+          <span class="slider-label">Overhead multiplier (total cost ÷ messaging cost)</span>
+          <span class="slider-value" id="val-overhead">150×</span>
+        </div>
+        <input type="range" id="sl-overhead" min="10" max="500" step="10" value="150"
+               oninput="update()">
+      </div>
+    </div>
+
+    <div class="results">
+      <div class="result-card">
+        <div class="result-card-label">Program cost</div>
+        <div class="result-card-value" id="card-cost" style="color: var(--blue);">—</div>
+        <div class="result-card-sub">total incl. overhead</div>
+      </div>
+      <div class="result-card">
+        <div class="result-card-label">DALYs averted</div>
+        <div class="result-card-value" id="card-dalys" style="color: var(--pur);">—</div>
+        <div class="result-card-sub">per year</div>
+      </div>
+      <div class="result-card">
+        <div class="result-card-label">Cost / DALY</div>
+        <div class="result-card-value" id="card-daly-value">—</div>
+        <div class="result-card-sub">GiveWell bar: ~$100</div>
+      </div>
+      <div class="result-card">
+        <div class="result-card-label">vs GiveWell bar</div>
+        <div class="result-card-value" id="card-vs-bar" style="color: var(--muted);">—</div>
+        <span id="bar-badge">—</span>
+      </div>
+    </div>
+
+    <div class="section-label">Model assumptions</div>
+    <table>
+      <tbody>
+        <tr><td style="color:var(--muted); font-size:10px;">Reminders per caregiver</td><td>7 (Nigeria EPI contact points)</td></tr>
+        <tr><td style="color:var(--muted); font-size:10px;">Messaging cost</td><td>$0.014 / message (Meta Cloud API, Nigeria, Utility, April 2026)</td></tr>
+        <tr><td style="color:var(--muted); font-size:10px;">VPD mortality rate (0.027)</td><td>Nigeria U5 mortality ~75/1000; ~35% vaccine-preventable attributable fraction</td></tr>
+        <tr><td style="color:var(--muted); font-size:10px;">DALYs per death (38)</td><td>Child dying at age ~2; Nigeria life expectancy ~63; adjusted for disability weights</td></tr>
+        <tr><td style="color:var(--muted); font-size:10px;">Overhead multiplier</td><td>Ratio of total program cost to messaging cost. Pilot: ~200–300×. At scale: target 50–100×.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ── 4. Sensitivity table ── -->
+  <div class="card">
+    <h2>Sensitivity Table</h2>
+    <p class="card-note">$/DALY by uplift and overhead multiplier — fixed at 15,000 caregivers, 7 reminders, $0.014/msg</p>
+    <div id="sensitivity-table-container"></div>
+    <div class="legend" style="margin-top: 14px;">
+      <div class="legend-item">
+        <div class="legend-dot" style="background: var(--green);"></div>
+        ≤ $100 — meets GiveWell bar
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background: var(--org);"></div>
+        $101–$300 — promising; overhead reduction needed
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background: var(--red);"></div>
+        &gt; $300 — scale and efficiency improvements required
+      </div>
+    </div>
+  </div>
+
+  <div class="page-footer">notify-health-whatsapp-prototype · nigeria cost-effectiveness · april 2026</div>
+
+  <script>
+    const MSG_COST    = 0.014;
+    const REMINDERS   = 7;
+    const VPD_RATE    = 0.027;
+    const DALYS_DEATH = 38;
+    const GIVEWELL    = 100;
+
+    function fmt(n) {
+      if (n >= 1e6) return '$' + (n / 1e6).toFixed(2) + 'M';
+      if (n >= 1e3) return '$' + Math.round(n).toLocaleString();
+      return '$' + n.toFixed(0);
+    }
+
+    function calcDaly(caregivers, upliftPct, overhead) {
+      const uplift = upliftPct / 100;
+      const cost   = caregivers * REMINDERS * MSG_COST * overhead;
+      const dalys  = caregivers * uplift * VPD_RATE * DALYS_DEATH;
+      return { cost, dalys, perDaly: cost / dalys };
+    }
+
+    function barClass(pd) {
+      if (pd <= GIVEWELL)        return 'below-bar';
+      if (pd <= GIVEWELL * 3)    return 'near-bar';
+      return 'above-bar';
+    }
+
+    function update() {
+      const caregivers = +document.getElementById('sl-caregivers').value;
+      const uplift     = +document.getElementById('sl-uplift').value;
+      const overhead   = +document.getElementById('sl-overhead').value;
+
+      document.getElementById('val-caregivers').textContent = caregivers.toLocaleString();
+      document.getElementById('val-uplift').textContent     = uplift + ' pp';
+      document.getElementById('val-overhead').textContent   = overhead + '×';
+
+      const { cost, dalys, perDaly } = calcDaly(caregivers, uplift, overhead);
+      const cls = barClass(perDaly);
+      const ratio = (perDaly / GIVEWELL).toFixed(1);
+
+      document.getElementById('card-cost').textContent         = fmt(cost);
+      document.getElementById('card-dalys').textContent        = Math.round(dalys).toLocaleString();
+      document.getElementById('card-daly-value').textContent   = fmt(perDaly);
+      document.getElementById('card-daly-value').className     = cls;
+      document.getElementById('card-vs-bar').textContent       = ratio + '×';
+      document.getElementById('card-vs-bar').style.color       =
+        cls === 'below-bar' ? 'var(--green)' : cls === 'near-bar' ? 'var(--org)' : 'var(--red)';
+
+      const badge = document.getElementById('bar-badge');
+      badge.className = cls;
+      badge.textContent =
+        cls === 'below-bar' ? '✓ meets bar' :
+        cls === 'near-bar'  ? '~ near bar' :
+                              '✗ above bar';
+    }
+
+    function buildSensitivityTable() {
+      const UPLIFT_STEPS    = [5, 10, 15, 20, 25, 30];
+      const OVERHEAD_STEPS  = [50, 100, 150, 200, 300, 500];
+      const CAREGIVERS      = 15000;
+
+      let html = '<table id="sensitivity-table">';
+      html += '<thead><tr><th>Overhead</th>';
+      UPLIFT_STEPS.forEach(u => {
+        html += `<th class="col-head" style="text-align:right;">${u}pp</th>`;
+      });
+      html += '</tr></thead><tbody>';
+
+      OVERHEAD_STEPS.forEach(ov => {
+        html += `<tr><td class="row-head">${ov}×</td>`;
+        UPLIFT_STEPS.forEach(u => {
+          const { perDaly } = calcDaly(CAREGIVERS, u, ov);
+          const cls = perDaly <= 100 ? 'cell-green' : perDaly <= 300 ? 'cell-org' : 'cell-red';
+          html += `<td class="num ${cls}">$${Math.round(perDaly)}</td>`;
+        });
+        html += '</tr>';
+      });
+
+      html += '</tbody></table>';
+      document.getElementById('sensitivity-table-container').innerHTML = html;
+    }
+
+    update();
+    buildSensitivityTable();
+  </script>
+</body>
+</html>
