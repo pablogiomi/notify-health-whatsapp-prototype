@@ -4,28 +4,31 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Cost-Effectiveness Analysis — Notify Health</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg:    #0d1117;
-      --card:  #161b22;
-      --bord:  #30363d;
-      --bord-dim: #21262d;
-      --green: #3fb950;
-      --blue:  #79c0ff;
-      --org:   #f0883e;
-      --pur:   #d2a8ff;
-      --muted: #8b949e;
-      --text:  #c9d1d9;
-      --red:   #ff7b72;
-      --head:  #f0f6fc;
+      --bg:       #FFFFFF;
+      --card:     #F8FAFC;
+      --bord:     #E2E8F0;
+      --bord-dim: #EDF2F7;
+      --green:    #16A34A;
+      --blue:     #1B6CA8;
+      --org:      #EA7C2B;
+      --pur:      #9333EA;
+      --muted:    #64748B;
+      --text:     #1A202C;
+      --red:      #DC2626;
+      --head:     #1A202C;
     }
 
     body {
       background: var(--bg);
       color: var(--text);
-      font-family: 'IBM Plex Mono', 'Fira Mono', 'Courier New', monospace;
+      font-family: 'Inter', system-ui, sans-serif;
       font-size: 13px;
       line-height: 1.6;
       padding: 20px 16px 48px;
@@ -67,18 +70,19 @@
     }
     .nav-btn {
       display: inline-block;
-      background: rgba(63, 185, 80, 0.094);
-      border: 1px solid rgba(63, 185, 80, 0.333);
-      color: var(--green);
+      background: rgba(27, 108, 168, 0.08);
+      border: 1px solid rgba(27, 108, 168, 0.3);
+      color: var(--blue);
       border-radius: 6px;
       padding: 8px 14px;
       font-size: 11px;
       font-family: inherit;
+      font-weight: 500;
       text-decoration: none;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.3px;
       white-space: nowrap;
     }
-    .nav-btn:hover { background: rgba(63, 185, 80, 0.15); }
+    .nav-btn:hover { background: rgba(27, 108, 168, 0.14); }
 
     /* ── Cards ── */
     .card {
@@ -168,8 +172,8 @@
       margin-top: 8px;
       font-size: 10px;
       color: var(--green);
-      background: rgba(63,185,80,0.08);
-      border: 1px solid rgba(63,185,80,0.2);
+      background: rgba(22,163,74,0.08);
+      border: 1px solid rgba(22,163,74,0.2);
       border-radius: 4px;
       padding: 4px 8px;
       display: inline-block;
@@ -237,9 +241,9 @@
       display: inline-block;
       font-weight: 700;
     }
-    #bar-badge.below-bar { color: var(--green); background: rgba(63,185,80,0.12); border: 1px solid rgba(63,185,80,0.3); }
-    #bar-badge.near-bar  { color: var(--org);   background: rgba(240,136,62,0.12); border: 1px solid rgba(240,136,62,0.3); }
-    #bar-badge.above-bar { color: var(--red);   background: rgba(255,123,114,0.12); border: 1px solid rgba(255,123,114,0.3); }
+    #bar-badge.below-bar { color: var(--green); background: rgba(22,163,74,0.10); border: 1px solid rgba(22,163,74,0.3); }
+    #bar-badge.near-bar  { color: var(--org);   background: rgba(234,124,43,0.10); border: 1px solid rgba(234,124,43,0.3); }
+    #bar-badge.above-bar { color: var(--red);   background: rgba(220,38,38,0.10); border: 1px solid rgba(220,38,38,0.3); }
 
     /* ── Sensitivity table ── */
     #sensitivity-table td.cell-green { color: var(--green); font-weight: 700; }
@@ -254,17 +258,20 @@
     .legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
 
     /* ── Footer ── */
-    .page-footer { margin-top: 24px; font-size: 9px; color: var(--bord); text-align: right; }
+    .page-footer { margin-top: 24px; font-size: 9px; color: var(--muted); text-align: right; }
   </style>
 </head>
 <body>
 
   <!-- ── Header ── -->
   <div class="page-header">
-    <div>
-      <div class="tagline">● notify-health-whatsapp-prototype</div>
-      <h1>Cost-Effectiveness Analysis</h1>
-      <p class="subtitle">Nigeria EPI · WhatsApp reminders · $/DALY model · April 2026</p>
+    <div style="display:flex;align-items:flex-start;gap:12px;">
+      <img src="https://static.wixstatic.com/media/8f90d6_882dbd58c7884c1ea5ad885d809f03ac~mv2.png"
+           alt="Notify Health" style="height:34px;width:auto;margin-top:3px;">
+      <div>
+        <h1>Cost-Effectiveness Analysis</h1>
+        <p class="subtitle">Nigeria EPI · WhatsApp reminders · $/DALY model · April 2026</p>
+      </div>
     </div>
     <div class="nav-buttons">
       <a href="/dashboard" class="nav-btn">← Dashboard</a>
