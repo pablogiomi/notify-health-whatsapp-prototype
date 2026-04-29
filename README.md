@@ -41,30 +41,13 @@ This README will be updated as the project progresses. At any point it reflects 
 | Campaign runner         | ✅ Working                                     |
 | Dashboard               | ✅ Working (HTMX auto-refresh)                 |
 | Deployment              | ✅ Live on Railway                             |
+| Cost-Effectiveness Analysis (/cea) | ✅ Live on Railway |
 
 ---
 
-## How to run it (placeholder — will be filled in as we go)
+## How to run it
 
-```bash
-# Clone
-git clone git@github.com:pablogiomi/notify-health-whatsapp-prototype.git
-cd notify-health-whatsapp-prototype
-
-# Set up Python environment
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-
-# Configure secrets
-cp .env.example .env
-# Edit .env and fill in your Meta Cloud API credentials — see docs/setup.md
-
-# Run
-uvicorn app.main:app --reload
-```
-
-A separate `docs/setup.md` will walk through obtaining Meta Cloud API credentials and running the app end-to-end for the first time. That file does not yet exist.
+See [`docs/setup.md`](docs/setup.md) for the full step-by-step guide covering prerequisites, virtual environment setup, Meta developer account configuration, seeding recipients, starting the server, and setting up ngrok for local webhook testing.
 
 ---
 
@@ -77,6 +60,23 @@ If you are from Notify Health reviewing this:
 - [`docs/DECISIONS.md`](docs/DECISIONS.md) is a running log of architectural decisions — every tradeoff is documented, not hidden.
 - [`docs/whatsapp-api-primer.md`](docs/whatsapp-api-primer.md) is a plain-language explanation of how the WhatsApp Cloud API actually works, useful for anyone on your team evaluating WhatsApp as a channel.
 - [`docs/production-migration.md`](docs/production-migration.md) (to be added) documents what changes between this prototype and a production deployment.
+
+---
+
+## Business Case
+
+A cost analysis comparing WhatsApp, SMS, and voice channels for immunisation
+reminders in Nigeria is documented in
+[`docs/business-case-nigeria.md`](docs/business-case-nigeria.md).
+
+Key findings (April 2026):
+- WhatsApp utility: $0.014/msg (Nigeria, Meta direct API)
+- SMS via Africa's Talking + Telerivet: ~$0.0085/msg
+- Voice via Africa's Talking + Telerivet: ~$0.016/call
+- No price difference between text, image, and audio templates
+- Current Notify Health cost-effectiveness: ~5× GiveDirectly
+- A/B test (text vs audio vs image) is the primary lever for
+  improving $/DALY without increasing per-message cost
 
 ---
 

@@ -298,4 +298,43 @@ scope for the prototype.
 
 ---
 
+## DR-019 — WhatsApp message category: Utility over Marketing
+
+**Date:** 2026-04-28
+**Status:** Accepted
+
+**Context.** Meta classifies WhatsApp Business templates into categories: Utility, Marketing, and Authentication. The category determines the per-message price. Immunisation reminders must be assigned a category at template submission.
+
+**Decision.** Submit all immunisation reminder templates under the Utility category.
+
+**Reasoning.** Vaccination reminders are non-promotional transactional messages triggered by a health schedule, not a marketing campaign. The price difference in Nigeria is significant: Utility costs $0.014/message vs Marketing at $0.086/message — roughly 6× cheaper. Template wording must avoid promotional language (e.g. no offers, no calls to action beyond attending a scheduled appointment) to maintain this classification. If Meta reclassifies a template as Marketing during review, wording must be revised and resubmitted.
+
+---
+
+## DR-020 — Meta Cloud API direct: no Business Solution Provider
+
+**Date:** 2026-04-28
+**Status:** Accepted
+
+**Context.** WhatsApp Business API access can be obtained via Meta's Cloud API directly or through a Business Solution Provider (BSP) such as Twilio, 360dialog, or MessageBird. BSPs add a markup on top of Meta's base rate in exchange for managed infrastructure, support, and sometimes easier onboarding.
+
+**Decision.** Use Meta Cloud API directly. No BSP.
+
+**Reasoning.** The prototype already uses the direct API. Continuing with this in production eliminates the BSP markup (~$0.003–$0.005/message on Twilio). At 20,000 caregivers sending 14 reminders each (two EPI cycles/year), that is approximately $840–$1,400/year saved. There is no service that a BSP provides that the prototype cannot replicate: delivery is handled by Meta; webhook integration is already implemented; and the additional operational overhead of direct API management is minimal given the system already handles it.
+
+---
+
+## DR-021 — Media type for WhatsApp templates: TBD by A/B test
+
+**Date:** 2026-04-28
+**Status:** Deferred — pending A/B test results
+
+**Context.** Meta charges the same $0.014/message for text, audio, and image template messages in Nigeria. The question is not cost but effectiveness: which format produces the highest caregiver recall and appointment attendance?
+
+**Decision.** Do not select a media type now. Run a three-arm A/B test (Arm A: text, Arm B: audio, Arm C: image) with real caregivers once Notify Health approves test numbers and a custom Utility template has been approved by Meta.
+
+**Reasoning.** Audio reuses existing Notify Health IVR recordings at no additional production cost. Image allows for visual schedule cards. Text is the simplest to approve and most bandwidth-efficient. Because Meta's pricing does not differentiate, choosing a format without data would leave potential effectiveness gains on the table. The A/B test design is documented in `docs/business-case-nigeria.md` and the interactive $/DALY model is at `/cea`.
+
+---
+
 *New decisions will be added below as they occur.*
